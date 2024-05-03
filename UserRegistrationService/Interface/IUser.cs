@@ -9,6 +9,7 @@ namespace UserManagementService.Interface
         public Task<bool> RegisterUser(UserEntity User);
         public Task<string> UserLogin(UserLoginModel userLogin);
         public Task<IEnumerable<UserResponse>> GetUsers();
+        public Task<UserResponse> GetUserByUserId(int UserId);
 
     }
 }
