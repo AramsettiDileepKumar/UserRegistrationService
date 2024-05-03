@@ -44,12 +44,7 @@ namespace UserManagementService.Service
             var querytoCheckEmailIsNotDuplicate = @"SELECT COUNT(*) FROM Users WHERE Email = @Email;";
             var parametersToCheckEmailIsValid = new DynamicParameters();
             parametersToCheckEmailIsValid.Add("Email", userRegModel.Email, DbType.String);
-            // Check if email already exists
-            bool emailExists = await connection.QueryFirstOrDefaultAsync<bool>(querytoCheckEmailIsNotDuplicate, parametersToCheckEmailIsValid);
-            if (emailExists)
-            {
-                throw new Exception("Email address is already in use");
-            }
+
             var query = @" INSERT INTO Users(FirstName, LastName, Email, Password,Role) VALUES (@FirstName, @LastName, @Email, @Password,@Role);";
             var parameters = new DynamicParameters();
             parameters.Add("FirstName", userRegModel.FirstName, DbType.String);
@@ -114,10 +109,25 @@ namespace UserManagementService.Service
                 throw new Exception(ex.Message);
             }
         }
+        public async Task<UserResponse> GetUserByUserId(int UserId)
+        {
+            try
+            {
+                var query = "Select * from Users where UserId=@userid";
+                var connection = context.CreateConnection();
+                var registrations = await connection.QueryFirstOrDefaultAsync<UserResponse>(query, new {userid=UserId});
+                return registrations;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
         private UserResponse MapToResponse(UserEntity response)
         {
             return new UserResponse
             {
+                UserId=response.UserID,
                 FirstName = response.FirstName,
                 LastName = response.LastName,
                 Email = response.Email,
@@ -163,12 +173,15 @@ namespace UserManagementService.Service
             {
                 throw new ArgumentException("JWT secret key must be at least 256 bits (32 bytes)");
             }
-            var tokenDescriptor = new SecurityTokenDescriptor
+            string name = user.FirstName+" "+user.LastName;
+           var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-            new Claim(ClaimTypes.Email, user.Email),
-           // new Claim("Userid",user.userId.ToString())
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(ClaimTypes.Role, user.Role),
+                    new Claim(ClaimTypes.Name,name),
+                    new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

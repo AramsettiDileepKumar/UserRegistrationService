@@ -30,7 +30,6 @@ namespace UserManagementService.Controllers
                 {
                     var response = new ResponseModel<bool>
                     {
-                        StatusCode=200,
                         Success = true,
                         Message = "User Registration Successful",
                         Data=addedUser
@@ -44,7 +43,7 @@ namespace UserManagementService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while adding the user: {ex.Message}");
+                return Ok( $"An error occurred while adding the user: {ex.Message}");
             }
         }
         [HttpPost("signUp/patient")]
@@ -70,7 +69,7 @@ namespace UserManagementService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while adding the user: {ex.Message}");
+                return Ok($"An error occurred while adding the user: {ex.Message}");
             }
         }
         [HttpPost("signup/doctor")]
@@ -96,7 +95,7 @@ namespace UserManagementService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while adding the user: {ex.Message}");
+                return Ok($"An error occurred while adding the user: {ex.Message}");
             }
         }
         [HttpPost("login")]
@@ -109,7 +108,6 @@ namespace UserManagementService.Controllers
                 {
                     var response = new ResponseModel<string>
                     {
-                        StatusCode=200,
                         Success = true,
                         Message = "User Login Successful",
                         Data = login
@@ -120,7 +118,6 @@ namespace UserManagementService.Controllers
                 {
                     var respons = new ResponseModel<string>
                     {
-                        StatusCode =400,
                         Success = false,
                         Message = "Invalid User",
                         Data = login
@@ -130,7 +127,7 @@ namespace UserManagementService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while adding the user: {ex.Message}");
+                return Ok($"An error occurred while adding the user: {ex.Message}");
             }
         }
         [HttpGet]
@@ -143,7 +140,6 @@ namespace UserManagementService.Controllers
                 {
                     var response = new ResponseModel<IEnumerable<UserResponse>>
                     {
-                        StatusCode = 200,
                         Success = true,
                         Message = "Users  Details Fetched Successfully",
                         Data=result
@@ -152,14 +148,27 @@ namespace UserManagementService.Controllers
                 }
                 return BadRequest(new ResponseModel<UserEntity>
                 {
-                    StatusCode = 400,
                     Success = false,
                     Message = "User Not Found"
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return Ok(ex.Message);
+            }
+        }
+        [HttpGet("GetUserById{UserId}")]
+        public async Task<IActionResult> GetUserById(int UserId)
+        {
+            try
+            {
+                Console.WriteLine("Hello");
+                var result = await _user.GetUserByUserId(UserId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return Ok( ex.Message);
             }
         }
         private async Task<bool> MapToEntity<T>(T model)
